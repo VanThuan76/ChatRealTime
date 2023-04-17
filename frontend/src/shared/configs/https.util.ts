@@ -22,7 +22,6 @@ class AxiosConfig {
     axios.interceptors.response.use(
       response => response,
       error => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.response.status === 403) {
           // redirect
           return Promise.reject(error)
