@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Card, Checkbox, Form, Input, message } from 'antd';
 import BlankLayout from '~/shared/layouts/BlankLayout';
 import Head from 'next/head';
@@ -6,25 +6,30 @@ import { useMutation } from 'react-query';
 import { authService } from '~/shared/servers/auth.service';
 import { getCookie, setCookie } from 'cookies-next';
 import { useRouter } from 'next/router';
+import { login } from '~/shared/store/appSlice';
+import { useDispatch } from 'react-redux';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { io } from 'socket.io-client';
 
 const Login = ({}) => {
     const router = useRouter()
+    const dispatch = useDispatch()
+    const socket = io(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL_DEFAULT}`,{ transports : ['websocket']});
     const loginMutation = useMutation({
         mutationKey: 'login',
         mutationFn: (body: { email: string, password: string }) => authService.authenticated(body),
         onSuccess(data, _variables, _context) {
-            if (data) {
+            if (data.data){
                 setCookie('isAuthenticated', true)
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                setCookie('dataUser', data.data)
+                dispatch(login(data.data))
                 router.push("/")
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 message.success(
                     'Đăng nhập thành công',
                 );
             }
         },
         onError(error, variables, context) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
              message.error(
                 'Đăng nhập không thành công',
             );
@@ -32,11 +37,14 @@ const Login = ({}) => {
     })
     const handleLogin = (values: {email: string, password:string}) => {
         loginMutation.mutate(values)
+        socket.emit('login', values.email)
     };
     useEffect(() => {
         const auth = getCookie('isAuthenticated')
-        if(auth){
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        const dataUser = getCookie('dataUser')
+        if(auth && typeof dataUser === "string"){
+            const dataJsonParse = JSON.parse(dataUser)
+            dispatch(login(dataJsonParse))
             router.push("/")
         }
     },[])
@@ -50,8 +58,8 @@ const Login = ({}) => {
             style={{ minWidth: 400 }}
         >
             <Form
-                name="basic"
-                layout='vertical'
+                name="normal_login"
+                style={{width: "100%"}}
                 initialValues={{ remember: true }}
                 onFinish={handleLogin}
                 autoComplete="off"
@@ -61,22 +69,35 @@ const Login = ({}) => {
                 name="email"
                 rules={[{ required: true, message: 'Please input your username!' }]}
             >
-                <Input />
+                <Input prefix={<UserOutlined className="site-form-item-icon" />} />
             </Form.Item>
             <Form.Item
                 label="Password"
                 name="password"
                 rules={[{ required: true, message: 'Please input your password!' }]}
             >
-                <Input.Password />
+                <Input.Password prefix={<LockOutlined className="site-form-item-icon" />} />
             </Form.Item>
-            <Form.Item name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
-                <Checkbox>Remember me</Checkbox>
+            <Form.Item>
+                <Form.Item name="remember" valuePropName="checked" noStyle>
+                    <Checkbox>Remember me</Checkbox>
+                </Form.Item>
+                <a style={{float: "right"}}
+                onClick={() =>
+                     router.push(
+                    {
+                        pathname: '/auth/[auth]',
+                        query: {auth: "forgot_password"},
+                    }
+                    )}>
+                 Forgot password
+                </a>
             </Form.Item>
-            <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                <Button style={{color: "#000"}} type="primary" htmlType="submit">
+            <Form.Item>
+                <Button style={{color: "#000", width: "100%"}} type="primary" htmlType="submit">
                     Submit
                 </Button>
+                Or <a onClick={() => router.push("/auth/register")}>register now!</a>
             </Form.Item>
             </Form>
         </Card>
