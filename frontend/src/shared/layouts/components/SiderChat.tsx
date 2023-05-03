@@ -1,6 +1,5 @@
-import { DownOutlined, RightOutlined } from "@ant-design/icons";
-import { Avatar, Badge, Col, Collapse, Input, Layout, List, Row, Typography } from "antd";
-import React, { useEffect, useState } from "react";
+import { Avatar, Badge, Card, Collapse, Input, Layout, List, Typography } from "antd";
+import React, { ReactNode, useState } from "react";
 import { useQueries, useQuery } from "react-query";
 import { userService } from "~/shared/servers/user.service";
 import { IUser } from "~/shared/typeDef/auth.type";
@@ -9,8 +8,10 @@ import { setCurrentBoxChat, setCurrentConversationIdChat, setCurrentUserIdChat }
 import { setCookie } from "cookies-next";
 import { useAppSelector } from "~/shared/hooks/useRedux";
 import { io } from "socket.io-client";
+import { MoreOutlined } from "@ant-design/icons";
 const { Sider } = Layout;
 const { Panel } = Collapse;
+const { Search } = Input;
 
 interface Props {
     participantsId: any
@@ -20,7 +21,7 @@ const SiderChat = ({participantsId}: Props) => {
     const socket = io(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL_DEFAULT}`,{ transports : ['websocket']});
     const [usernameCurrent, setUsernameCurrent] = useState<string>()
     const [collapsed, setCollapsed] = useState(true);
-    const {currentBoxChat} = useAppSelector((state) => state.appSlice)
+    const {currentBoxChat, dataUser} = useAppSelector((state) => state.appSlice)
     const listUserChat: IUser[] = []
     const queryResults = useQueries(
         participantsId.map((userId:any) => ({
@@ -33,7 +34,6 @@ const SiderChat = ({participantsId}: Props) => {
           },
         }))
     );
-    console.log(queryResults)
     // useEffect(() => {
     //     socket.on('listUserChat', listUserChat => {
     //             return listUserChat
@@ -63,44 +63,50 @@ const SiderChat = ({participantsId}: Props) => {
         const currentBoxChat = dispatch(setCurrentBoxChat(index))
         setCookie("currentBoxChat", currentBoxChat)
     }
-    const handleSearch = (value: string | number) => {
+    const handleSearch = (value: string) => {
         console.log('search value:', value);
     };
     return (
         <Sider
         style={{ background: "#fff" , margin: '24px 2px 0', borderRadius: 10 }} width={300}
         >
-         <Input.Search
-            style={{ display: "flex", margin: "12px", width: "90%" }}
-            placeholder={"Search"}
-            allowClear
-            // enterButton={<SearchOutlined/>}
-            size="middle"
-            onSearch={(value) => handleSearch(value)}
-        />
+        <Card size="small" bordered>
+            <div className="text-2xl flex items-center justify-start">
+                <img className="block m-2 max-w-[32px] max-h-[32px] rounded-[50px]" alt="userIcon" src={`${dataUser?.image}`} />
+                <Typography>{dataUser?.username}</Typography>
+                <MoreOutlined style={{fontSize: "18px", position: "absolute", right: 10}} />
+            </div>
+        </Card>
+        <Search 
+        size="large"
+        style={{margin: "10px 0", padding: "0 10px"}}
+        placeholder="Search or start new chat..." 
+        onSearch={handleSearch} 
+        enterButton />
+
         {
            collapsed && queryResults && listUserChat &&
-           <Collapse  style={{border: "none"}} size="small" bordered={false}>
-            <Panel header={`All Message ${queryResults?.length}`} key="1">
-            <List
-            itemLayout="horizontal"
-            dataSource={listUserChat}
-            renderItem={(item:IUser, index) => (
-            <List.Item style={{margin: "0 12px"}} onClick={() => handleChoose({userId: item.id as number, userNameCurrent: item.username as string ,index})}>
-                <List.Item.Meta
-                    style={{backgroundColor: currentBoxChat === index ? "#EEEEEE" : "", padding: "12px", borderRadius: 10, cursor: "pointer"}}
-                    avatar={
-                    <Badge color={item?.active === 1 ? "green" : "red"} dot={true}>
-                        <Avatar src={`${item.image}`} />
-                    </Badge>
-                    }
-                    title={item.username}
-                    description={item.name}
+           <Collapse defaultActiveKey={1} style={{border: "none"}} size="small" bordered={false}>
+                <Panel header={`All Message ${queryResults?.length}`} key="1">
+                <List
+                itemLayout="horizontal"
+                dataSource={listUserChat}
+                renderItem={(item:IUser, index) => (
+                <List.Item style={{margin: "0 12px"}} onClick={() => handleChoose({userId: item.id as number, userNameCurrent: item.username as string ,index})}>
+                    <List.Item.Meta
+                        style={{backgroundColor: currentBoxChat === index ? "#EEEEEE" : "", padding: "12px", borderRadius: 10, cursor: "pointer"}}
+                        avatar={
+                        <Badge color={item?.active === 1 ? "green" : "red"} dot={true}>
+                            <Avatar src={`${item.image}`} />
+                        </Badge>
+                        }
+                        title={item.username}
+                        description={item.name}
+                    />
+                </List.Item>
+                )}
                 />
-            </List.Item>
-            )}
-            />
-            </Panel>
+                </Panel>
             </Collapse>   
         }
       </Sider>

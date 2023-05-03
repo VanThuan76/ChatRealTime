@@ -8,8 +8,9 @@ export const APP_THEME = {
     theme: {
         light: {
             token: {
-                colorPrimary: '#C0DBEA',
-                colorBgContainer: '#C0DBEA',
+                colorPrimary: '#3498db',
+                colorBgLayout:'#ecf0f1',
+                colorBgContainer: '#fff',
                 colorBgBase: "#fff",
                 colorText: '#000',
                 colorTextPlaceholder: "#000",
@@ -19,7 +20,7 @@ export const APP_THEME = {
                     colorText: '#000'
                 },
                 Input: {
-                    colorTextPlaceholder: '#cbd5e1'
+                    colorTextPlaceholder: '#000'
                 }
             }
         } as ThemeConfig,
@@ -29,11 +30,11 @@ export const APP_THEME = {
                 colorBgBase: "rgb(33, 33, 52)",
                 colorBgContainer: '#C0DBEA',
                 colorText: '#fff',
-                colorTextPlaceholder: "#fff"
+                colorTextPlaceholder: "#000"
             },
             components: {
                 Typography: {
-                    colorText: '#fff'
+                    colorText: '#000'
                 },
                 Input: {
                     colorTextPlaceholder: '#cbd5e1'
@@ -50,3 +51,15 @@ export const APP_SAVE_KEYS = {
     THEME: 'THEME',
     LANGUAGE: 'LANGUAGE'
 }
+
+export const APP_SETTINGS = {
+    THEME: {
+        NIGHT: 'dark',
+        LIGHT: 'light',
+    },
+    LANGUAGE: {
+        EN: 'en',
+        VI: 'vi'
+    }
+}
+
