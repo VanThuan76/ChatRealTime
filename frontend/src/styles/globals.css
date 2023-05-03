@@ -5,6 +5,7 @@
 html,
 body {
   min-height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -38,3 +39,4 @@ body::-webkit-scrollbar {
 #__next {
   min-height: 100vh;
 }
+

@@ -1,11 +1,12 @@
 import React, { ReactNode, useEffect } from "react";
 import { Layout} from "antd";
-import SiderHeader from "./components/SiderHeader";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { login, setCurrentBoxChat, setCurrentConversationIdChat, setCurrentUserIdChat } from "../store/appSlice";
-import SiderMenu from "~/shared/layouts/components/SiderMenu";
+import { Footer } from "antd/lib/layout/layout";
+import SiderMenu from "./components/SiderMenu";
+import SiderChat from "./components/SiderChat";
 
 const { Header } = Layout;
 
@@ -30,14 +31,11 @@ const DashboardLayout = ({children}:Props) => {
         }
     },[])
     return (
-    <Layout>
-        <Header style={{padding: 0, margin: 0, backgroundColor: "#fff"}}>
-            <SiderHeader/>
-        </Header>
-        <Layout style={{ minHeight: '100vh' }}>
-            <SiderMenu/>
-            {children}
-        </Layout>
+    <Layout style={{ minHeight: '100vh' }}>
+        {/* <Layout style={{ minHeight: '100vh' }}> */}
+        <SiderMenu/>
+        {children}
+        {/* </Layout> */}
     </Layout>
     );
 }
